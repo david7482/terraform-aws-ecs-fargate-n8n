@@ -36,7 +36,7 @@ The deployment runs in an existing VPC's private subnets without requiring publi
 
 1. **Clone or reference this module**
 
-2. **Create a `.tfvars` file** (see `configs/apne1.tfvars` as example):
+2. **Create a `.tfvars` file** (see `configs/us-east-1.tfvars` as example):
 
 ```hcl
 region   = "us-east-1"
