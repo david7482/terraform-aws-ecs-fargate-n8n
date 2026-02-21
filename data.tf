@@ -6,8 +6,8 @@ data "aws_vpc" "main" {
   }
 }
 
-# Look up private subnets by tag
-data "aws_subnets" "private" {
+# Look up public subnets by tag
+data "aws_subnets" "public" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.main.id]
@@ -15,16 +15,6 @@ data "aws_subnets" "private" {
 
   filter {
     name   = "tag:Name"
-    values = ["*private*"]
-  }
-}
-
-# Default security group for the VPC
-data "aws_security_group" "default" {
-  vpc_id = data.aws_vpc.main.id
-
-  filter {
-    name   = "group-name"
-    values = ["default"]
+    values = ["*public*"]
   }
 }

@@ -21,7 +21,7 @@ resource "aws_security_group" "efs" {
     from_port       = 2049
     to_port         = 2049
     protocol        = "tcp"
-    security_groups = [data.aws_security_group.default.id]
+    security_groups = [aws_security_group.ecs.id]
   }
 
   egress {
@@ -36,9 +36,9 @@ resource "aws_security_group" "efs" {
   })
 }
 
-# EFS Mount Targets in private subnets
+# EFS Mount Targets in public subnets (colocated with ECS tasks)
 resource "aws_efs_mount_target" "n8n" {
-  for_each = toset(data.aws_subnets.private.ids)
+  for_each = toset(data.aws_subnets.public.ids)
 
   file_system_id  = aws_efs_file_system.n8n.id
   subnet_id       = each.value

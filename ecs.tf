@@ -105,7 +105,25 @@ resource "aws_ecs_task_definition" "n8n" {
   tags = var.tags
 }
 
-# ECS Service - runs in private subnets with Fargate Spot
+# Security group for ECS tasks - no inbound, all outbound
+resource "aws_security_group" "ecs" {
+  name        = "${var.name}-ecs"
+  description = "ECS tasks - egress only, no inbound from internet"
+  vpc_id      = data.aws_vpc.main.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.tags, {
+    Name = "${var.name}-ecs"
+  })
+}
+
+# ECS Service - runs in public subnets (no NAT needed), secured by SG with no inbound rules
 resource "aws_ecs_service" "n8n" {
   name            = var.name
   cluster         = aws_ecs_cluster.main.id
@@ -119,9 +137,9 @@ resource "aws_ecs_service" "n8n" {
   }
 
   network_configuration {
-    subnets          = data.aws_subnets.private.ids
-    security_groups  = [data.aws_security_group.default.id]
-    assign_public_ip = false
+    subnets          = data.aws_subnets.public.ids
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = true
   }
 
   depends_on = [aws_efs_mount_target.n8n]
